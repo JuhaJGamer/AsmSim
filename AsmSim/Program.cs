@@ -16,17 +16,17 @@ namespace AsmSim
             byte[,] ram = new byte[256, 2];
             byte[] flags = new byte[8];
 
-            Console.Title = "JAsm v0.3";
+            Console.Title = "AsmSim v0.4";
 
             while (true)
             {
                 Select(true);
                 string str;
                 Console.SetCursorPosition(0, 0);
-                Console.Write((str = "    JAsm v0.3 | RISC Assembly simulation") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                Console.Write((str = "    AsmSim v0.4 with JAsm v0.3 | RISC Assembly simulation") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                 Console.SetCursorPosition(0, Console.WindowHeight - 1);
                 Select(false);
-                int c = Menu(new string[] { "Program", "Run", "Save", "Load", "Clear", "Quit" }, "SELECT ACTION:\n","    JAsm v0.3 | RISC Assembly simulation");
+                int c = Menu(new string[] { "Program", "Run", "Save", "Load", "Clear", "Info", "Quit" }, "SELECT ACTION:\n", "    JAsm v0.3 | RISC Assembly simulation");
 
                 if (c == 0)
                 {
@@ -153,7 +153,10 @@ namespace AsmSim
                         //SRF - Set Ram Flag (Ram flag determines which byte of ram to use) - 06
                         else if (com == 6)
                         {
-                            flags[1] = val;
+                            if (val == 0 || val == 1)
+                            {
+                                flags[1] = val;
+                            }
                         }
                         //CMP - Compare A and B - 07
                         else if (com == 7)
@@ -192,50 +195,62 @@ namespace AsmSim
                                 i = val;
                             }
                         }
-                        //ADD - Add A and B - 0B
+                        //JMP - Jump - 0B
                         else if (com == 11)
+                        {
+                            i = val;
+                        }
+                        //ADD - Add A and B - 0C
+                        else if (com == 12)
                         {
                             a += b;
                         }
-                        //SUB - Subtract A and B - 0C
-                        else if (com == 12)
+                        //SUB - Subtract A and B - 0D
+                        else if (com == 13)
                         {
                             a -= b;
                         }
-                        //MUL - Multiply A and B - 0D
-                        else if (com == 13)
+                        //MUL - Multiply A and B - 0E
+                        else if (com == 14)
                         {
                             a *= b;
                         }
-                        //DIV - Divide A and B - 0E
-                        else if (com == 14)
+                        //DIV - Divide A and B - 0F
+                        else if (com == 15)
                         {
                             a /= b;
                         }
-                        //OUT - Output A as a number - 0F
-                        else if (com == 15)
+                        //OUT - Output A as a number - 10
+                        else if (com == 16)
                         {
                             Console.Write(a);
                         }
-                        //OUC - Output A as a character - 10
-                        else if (com == 16)
+                        //OUC - Output A as a character - 11
+                        else if (com == 17)
                         {
                             Console.Write((char)a);
                         }
-                        //OUB - Output A as a Hexadecimal Byte - 11
-                        else if (com == 17)
+                        //OUB - Output A as a Hexadecimal Byte - 12
+                        else if (com == 18)
                         {
                             Console.Write(ToHex(a));
                         }
-                        //GCH - (getch) Get character from prompt - 12
-                        else if (com == 18)
+                        //GCH - (getch) Get character from prompt - 13
+                        else if (com == 19)
                         {
                             a = (byte)Console.Read();
                         }
-                        //GNM - Get Number from propt - 13
-                        else if (com == 19)
+                        //GNM - Get Number from prompt - 14
+                        else if (com == 20)
                         {
                             a = CharNum((byte)Console.Read());
+                        }
+                        //GET - Get Byte from prompt - 15
+                        else if (com == 20)
+                        {
+                            char o1 = Console.ReadKey().KeyChar;
+                            char o2 = Console.ReadKey().KeyChar;
+                            a = ToByte(new char[] { o1, o2 });
                         }
 
                     }
@@ -357,7 +372,7 @@ namespace AsmSim
                             {
                                 for (int j = 0; j < 8; j++)
                                 {
-                                     ram[i * 8 + j, 0] = bmp.GetPixel(i, j).R;
+                                    ram[i * 8 + j, 0] = bmp.GetPixel(i, j).R;
                                     ram[i * 8 + j, 1] = bmp.GetPixel(i, j).G;
                                 }
                             }
@@ -390,6 +405,131 @@ namespace AsmSim
                     Select(false);
                 }
                 else if (c == 5)
+                {
+                    while (true)
+                    {
+                        c = Menu(new string[] { "JAsm", "AsmSim", "Back" }, "SELECT ACTION:\n", "AsmSim v0.4 with JAsm v0.3 | Info");
+                        if (c == 0)
+                        {
+                            int scrl = 0;
+                            ConsoleKeyInfo ckey;
+                            string[] txt = new string[]
+                            {
+                            "JAsm v0.3 by JuhaJGamer 2017",
+                            "Command refrence",
+                            " Command construction: 00 00",
+                            "                       || ||",
+                            "         Instruction byte ||",
+                            "          Argument(val) byte",
+                            " Commands:                  ",
+                            "  00 - HLT - Halts the program",
+                            "  01 - STA - Stores a value into register A",
+                            "  02 - MVB - Moves a value from A to B",
+                            "  03 - MVA - Moves a value from B to A",
+                            "  04 - MVR - Moves a value from A to the specified RAM address",
+                            "   Note: The flag set by SFR sets which byte of RAM the value is stored in [0,1]",
+                            "  05 - MRA - \"Move RAM A\", Moves a value from the specified RAM address to A",
+                            "   Note: The note on instruction 04 also applies here. Use SFR to set flag",
+                            "  06 - SFR - Sets the \"RAM\" flag, value specifies whether to use the First byte (0) or the second byte (1)",
+                            "  07 - CMP - Compares A and B and sets a flag specified by the result",
+                            "  08 - JL  - Jump Less, Jumps to address specified by val if A is less that B",
+                            "  09 - JEQ - Jump Equal, Jumps to address specified by val if A and B are equal",
+                            "  0A - JG  - Jump Greater, Jumps to address specified by val if A is greater than B",
+                            "   Note: Does not compare on command run, relies on result produced by the CMP command",
+                            "  0B - JMP - Jumps to an address specified by val",
+                            "  0C - ADD - Adds B to A and stores the result in A",
+                            "  0D - SUB - Subtracts B from A and stores the result in A",
+                            "  0E - MUL - Multiplies A by B and store sthe result in A",
+                            "  0F - DIV - Divides A by B and stores the result in A",
+                            "   Note: No decimals, truncated answer",
+                            "  10 - OUT - Outputs A as a number (Ie. A = 10, OUT => \"10\")",
+                            "  11 - OUC - Outputs A as a character (Ie. A=6C, OUC => \"l\")",
+                            "  12 - OUB - Outputs A as a hexadecimal byte (Ie. A=1A =>\"1A\")",
+                            "  13 - GCH - Getch, Gets a character from the prompt and stores it in A",
+                            "  14 - GNM - Getnum, Gets a number from the prompt and stores it in A",
+                            "  15 - GET - Gets a hexadecimal byte from the prompt and stores it in A",
+                            "   Note: GET asks for 2 characters (to complete a byte), but GCH and GNM and for only 1",
+                            };
+                            while (true)
+                            {
+                                Console.Clear();
+                                Select(true);
+                                Console.SetCursorPosition(0, 0);
+                                Console.Write((str = "    JAsm v0.3 | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.SetCursorPosition(0, Console.WindowHeight - 1);
+                                Console.Write((str = "    JAsm v0.3 | Ctrl+Q to exit | Up: Scroll up| Down: Scroll down") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.SetCursorPosition(0, 0);
+                                Console.SetCursorPosition(0, 1);
+                                Select(false);
+                                for (int i = 0; i < Console.WindowHeight - 3; i++)
+                                {
+                                    Console.WriteLine(txt[scrl + i]);
+                                }
+                                ckey = Console.ReadKey();
+                                if (ckey.Key == ConsoleKey.UpArrow)
+                                {
+                                    if (scrl > 0) scrl--;
+                                }
+                                else if (ckey.Key == ConsoleKey.DownArrow)
+                                {
+                                    if (scrl < txt.Length - (Console.WindowHeight - 3)) scrl++;
+                                }
+                                else if (ckey.Key == ConsoleKey.Q && ckey.Modifiers == ConsoleModifiers.Control)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        else if (c == 1)
+                        {
+                            int scrl = 0;
+                            ConsoleKeyInfo ckey;
+                            string[] txt = new string[]
+                            {
+                                "AsmSim v0.4 by JuhaJGamer 2017",
+                                "Replicates a JAsm architechture processor,",
+                                "current JASm version 0.3",
+                                " ",
+                                "Changelog:",
+                                " Added info screens & patched mistypings",
+                            };
+                            while (true)
+                            {
+                                Console.Clear();
+                                Select(true);
+                                Console.SetCursorPosition(0, 0);
+                                Console.Write((str = "    AsmSim v0.4 | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.SetCursorPosition(0, Console.WindowHeight - 1);
+                                Console.Write((str = "    AsmSim v0.4 | Ctrl+Q to exit " + ((txt.Length > (Console.WindowHeight - 3))? "| Up: Scroll up| Down: Scroll down":"")) + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.SetCursorPosition(0, 0);
+                                Console.SetCursorPosition(0, 1);
+                                Select(false);
+                                for (int i = 0; i < ((txt.Length > Console.WindowHeight -3)?Console.WindowHeight - 3:txt.Length); i++)
+                                {
+                                    Console.WriteLine(txt[scrl + i]);
+                                }
+                                ckey = Console.ReadKey();
+                                if (ckey.Key == ConsoleKey.UpArrow)
+                                {
+                                    if (scrl > 0) scrl--;
+                                }
+                                else if (ckey.Key == ConsoleKey.DownArrow)
+                                {
+                                    if (scrl < txt.Length - (Console.WindowHeight - 3)) scrl++;
+                                }
+                                else if (ckey.Key == ConsoleKey.Q && ckey.Modifiers == ConsoleModifiers.Control)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        else if(c == 2)
+                        {
+                            break;
+                        }
+                    }
+                }
+                else if (c == 6)
                 {
                     Select(true);
                     Console.SetCursorPosition(0, Console.WindowHeight - 1);
