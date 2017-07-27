@@ -10,23 +10,27 @@ namespace AsmSim
 {
     class Program
     {
+
+        const string asmv = "v0.3";
+        const string simv = "v0.45";
+
         static void Main(string[] args)
         {
             byte a, b = a = 0;
             byte[,] ram = new byte[256, 2];
             byte[] flags = new byte[8];
 
-            Console.Title = "AsmSim v0.4";
+            Console.Title = "AsmSim " + simv + "";
 
             while (true)
             {
                 Select(true);
                 string str;
                 Console.SetCursorPosition(0, 0);
-                Console.Write((str = "    AsmSim v0.4 with JAsm v0.3 | RISC Assembly simulation") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                Console.Write((str = "    AsmSim " + simv + " with JAsm " + asmv + " | RISC Assembly simulation") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                 Console.SetCursorPosition(0, Console.WindowHeight - 1);
                 Select(false);
-                int c = Menu(new string[] { "Program", "Run", "Save", "Load", "Clear", "Info", "Quit" }, "SELECT ACTION:\n", "    JAsm v0.3 | RISC Assembly simulation");
+                int c = Menu(new string[] { "Program", "Run", "Save", "Load", "Clear", "Info", "Quit" }, "SELECT ACTION:\n", "    JAsm " + asmv + " | RISC Assembly simulation");
 
                 if (c == 0)
                 {
@@ -35,17 +39,17 @@ namespace AsmSim
                     Console.Clear();
                     bool p = true;
                     int cc = 0;
-                    ConsoleKey key;
+                    ConsoleKeyInfo key;
                     while (p)
                     {
-                        key = ConsoleKey.A;
+                        key = new ConsoleKeyInfo('a',ConsoleKey.A,true,true,true);
                         if (c < 128 && c >= 0)
                         {
                             Select(true);
                             Console.SetCursorPosition(0, 0);
-                            Console.Write((str = "    PROGRAM MODE | Q: Exit | Enter: Next Addr | Up: Prev Add | Down: Next Addr | Backspace: Left") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                            Console.Write((str = "    PROGRAM MODE | Ctrl-Q: Exit | Enter: Next Addr | Up: Prev Add | Down: Next Addr | Backspace: Left") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                             Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                            Console.Write((str = "    128-addr | 8-bit | RISC JAsm | v 0.3") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                            Console.Write((str = "    128-addr | 8-bit | RISC JAsm " + asmv + "") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                             Console.SetCursorPosition(0, 0);
                             Console.SetCursorPosition(0, 1);
                             for (int i = 0; i < Console.WindowHeight - 2; i++)
@@ -70,30 +74,30 @@ namespace AsmSim
                                 Console.SetCursorPosition(0, Console.CursorTop + 1);
                             }
                             Console.SetCursorPosition(0, 0);
-                            if ((key = Console.ReadKey(true).Key) == ConsoleKey.Q)
+                            if ((key = Console.ReadKey(true)).Key == ConsoleKey.Q && key.Modifiers == ConsoleModifiers.Control)
                             {
                                 break;
                             }
-                            else if (key == ConsoleKey.UpArrow)
+                            else if (key.Key == ConsoleKey.UpArrow)
                             {
                                 c--;
                             }
-                            else if (key == ConsoleKey.DownArrow)
+                            else if (key.Key == ConsoleKey.DownArrow)
                             {
                                 c++;
                             }
-                            else if (key == ConsoleKey.Enter)
+                            else if (key.Key == ConsoleKey.Enter)
                             {
                                 c++;
                                 cc = 0;
                             }
-                            else if (key == ConsoleKey.Backspace)
+                            else if (key.Key == ConsoleKey.Backspace)
                             {
                                 if (cc > 0) cc--;
                             }
                             else
                             {
-                                byte i = ParseKey(key);
+                                byte i = ParseKey(key.Key);
                                 if (i != 16)
                                 {
                                     char[] arr = ToHex(ram[c, cc > 1 ? 1 : 0]);
@@ -266,9 +270,9 @@ namespace AsmSim
                         Console.Clear();
                         Select(true);
                         Console.SetCursorPosition(0, 0);
-                        Console.Write((str = "    SAVE PROGRAM | JAsm v0.3") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                        Console.Write((str = "    SAVE PROGRAM | JAsm " + asmv + "") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                         Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                        Console.Write((str = "    JAsm v0.3 | Ctrl+Q to return") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                        Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to return") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                         Console.SetCursorPosition(0, 0);
                         Console.SetCursorPosition(0, 2);
                         Console.Write("File Path:");
@@ -317,7 +321,7 @@ namespace AsmSim
                         bmp.Save(pwd);
                         Select(true);
                         Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                        Console.Write((str = "    JAsm v0.3 | Ctrl+Q to return | Any key to continue | FILE SAVED") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                        Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to return | Any key to continue | FILE SAVED") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                         Console.SetCursorPosition(0, 0);
                         Select(false);
                         if (Console.ReadKey().Key == ConsoleKey.Q) break;
@@ -331,14 +335,14 @@ namespace AsmSim
                     Console.Clear();
                     Select(true);
                     Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                    Console.Write((str = "    JAsm v0.3 | Ctrl+Q to return") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                    Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to return") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                     while (p)
                     {
                         Select(false);
                         pwd = "";
                         Select(true);
                         Console.SetCursorPosition(0, 0);
-                        Console.Write((str = "    LOAD PROGRAM | JAsm v0.3") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                        Console.Write((str = "    LOAD PROGRAM | JAsm " + asmv + "") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                         Console.SetCursorPosition(0, 0);
                         Console.SetCursorPosition(0, 2);
                         Console.Write(str = "File Path:");
@@ -378,7 +382,7 @@ namespace AsmSim
                             }
                             Select(true);
                             Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                            Console.Write((str = "    JAsm v0.3 | Ctrl+Q to return | PROGRAM LOADED") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                            Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to return | PROGRAM LOADED") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                             Console.SetCursorPosition(0, 0);
                             bmp.Dispose();
                         }
@@ -386,7 +390,7 @@ namespace AsmSim
                         {
                             Select(true);
                             Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                            Console.Write((str = "    JAsm v0.3 | Ctrl+Q to return | FILE NOT FOUND") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                            Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to return | FILE NOT FOUND") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                             Console.SetCursorPosition(0, 0);
                         }
                     }
@@ -395,7 +399,7 @@ namespace AsmSim
                 {
                     Select(true);
                     Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                    Console.Write((str = "    JAsm v0.3 | Clear program memory? [Y/N]") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                    Console.Write((str = "    JAsm " + asmv + " | Clear program memory? [Y/N]") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                     Console.SetCursorPosition(0, 0);
                     if (Console.ReadKey().Key == ConsoleKey.Y)
                     {
@@ -408,14 +412,14 @@ namespace AsmSim
                 {
                     while (true)
                     {
-                        c = Menu(new string[] { "JAsm", "AsmSim", "Back" }, "SELECT ACTION:\n", "AsmSim v0.4 with JAsm v0.3 | Info");
+                        c = Menu(new string[] { "JAsm", "AsmSim", "Back" }, "SELECT ACTION:\n", "AsmSim " + simv + " with JAsm " + asmv + " | Info");
                         if (c == 0)
                         {
                             int scrl = 0;
                             ConsoleKeyInfo ckey;
                             string[] txt = new string[]
                             {
-                            "JAsm v0.3 by JuhaJGamer 2017",
+                            "JAsm " + asmv + " by JuhaJGamer 2017",
                             "Command refrence",
                             " Command construction: 00 00",
                             "                       || ||",
@@ -455,9 +459,9 @@ namespace AsmSim
                                 Console.Clear();
                                 Select(true);
                                 Console.SetCursorPosition(0, 0);
-                                Console.Write((str = "    JAsm v0.3 | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.Write((str = "    JAsm " + asmv + " | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                                 Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                                Console.Write((str = "    JAsm v0.3 | Ctrl+Q to exit | Up: Scroll up| Down: Scroll down") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to exit | Up: Scroll up| Down: Scroll down") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                                 Console.SetCursorPosition(0, 0);
                                 Console.SetCursorPosition(0, 1);
                                 Select(false);
@@ -486,25 +490,25 @@ namespace AsmSim
                             ConsoleKeyInfo ckey;
                             string[] txt = new string[]
                             {
-                                "AsmSim v0.4 by JuhaJGamer 2017",
+                                "AsmSim "+simv+" by JuhaJGamer 2017",
                                 "Replicates a JAsm architechture processor,",
-                                "current JASm version 0.3",
+                                "current JASm version "+asmv+"",
                                 " ",
                                 "Changelog:",
-                                " Added info screens & patched mistypings",
+                                " Updated client to v0.45,\n made easily changeable version numbers,\n Changed program mode into using ctrl + q for exiting.",
                             };
                             while (true)
                             {
                                 Console.Clear();
                                 Select(true);
                                 Console.SetCursorPosition(0, 0);
-                                Console.Write((str = "    AsmSim v0.4 | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.Write((str = "    AsmSim " + simv + " | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                                 Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                                Console.Write((str = "    AsmSim v0.4 | Ctrl+Q to exit " + ((txt.Length > (Console.WindowHeight - 3))? "| Up: Scroll up| Down: Scroll down":"")) + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.Write((str = "    AsmSim " + simv + " | Ctrl+Q to exit " + ((txt.Length > (Console.WindowHeight - 3)) ? "| Up: Scroll up| Down: Scroll down" : "")) + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                                 Console.SetCursorPosition(0, 0);
                                 Console.SetCursorPosition(0, 1);
                                 Select(false);
-                                for (int i = 0; i < ((txt.Length > Console.WindowHeight -3)?Console.WindowHeight - 3:txt.Length); i++)
+                                for (int i = 0; i < ((txt.Length > Console.WindowHeight - 3) ? Console.WindowHeight - 3 : txt.Length); i++)
                                 {
                                     Console.WriteLine(txt[scrl + i]);
                                 }
@@ -523,7 +527,7 @@ namespace AsmSim
                                 }
                             }
                         }
-                        else if(c == 2)
+                        else if (c == 2)
                         {
                             break;
                         }
@@ -533,7 +537,7 @@ namespace AsmSim
                 {
                     Select(true);
                     Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                    Console.Write((str = "    JAsm v0.3 | Quit? [Y/N]") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                    Console.Write((str = "    JAsm " + asmv + " | Quit? [Y/N]") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                     Console.SetCursorPosition(0, 0);
                     if (Console.ReadKey().Key == ConsoleKey.Y) break;
                     Select(false);
