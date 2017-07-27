@@ -11,7 +11,7 @@ namespace AsmSim
     class Program
     {
 
-        const string asmv = "v0.3";
+        const string asmv = "v0.4";
         const string simv = "v0.45";
 
         static void Main(string[] args)
@@ -256,6 +256,12 @@ namespace AsmSim
                             char o2 = Console.ReadKey().KeyChar;
                             a = ToByte(new char[] { o1, o2 });
                         }
+                        //BP - Console beep - 16
+                        else if (com == 21)
+                        {
+                            int bp = 255 * a;
+                            Console.Beep(bp, b * 10);
+                        }
 
                     }
                 }
@@ -453,6 +459,7 @@ namespace AsmSim
                             "  14 - GNM - Getnum, Gets a number from the prompt and stores it in A",
                             "  15 - GET - Gets a hexadecimal byte from the prompt and stores it in A",
                             "   Note: GET asks for 2 characters (to complete a byte), but GCH and GNM and for only 1",
+                            "  16 - BP  - Beep, causes a console beep. Frequency is controlled by A, with every 1 in A as 255 in BP. Length is controlled by B, and every 1 in B is 10 ms in BP",
                             };
                             while (true)
                             {
@@ -496,6 +503,7 @@ namespace AsmSim
                                 " ",
                                 "Changelog:",
                                 " Updated client to v0.45,\n made easily changeable version numbers,\n Changed program mode into using ctrl + q for exiting.",
+                                " Updated JAsm to v0.4,\n added BP command for console beeps.",
                             };
                             while (true)
                             {
