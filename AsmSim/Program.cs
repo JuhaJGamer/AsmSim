@@ -522,6 +522,7 @@ namespace AsmSim
                             "  1A - SSC - Set screen color. A is text color, B is background color.",
                             "   Note: A table of usable numbers with their associated colors can be found at MSDN, by searching for \"ConsoleColour\""
                             };
+                            Console.Clear();
                             while (true)
                             {
                                 Console.Clear();
@@ -734,9 +735,10 @@ namespace AsmSim
             {
                 items[i] = new MenuItem(i > 0 ? false : true, new Action(dummy), v1[i]);
             }
+            Select(false);
+            Console.Clear();
             while (true)
             {
-                Console.Clear();
                 Select(true);
                 string str;
                 Console.SetCursorPosition(0, 0);
