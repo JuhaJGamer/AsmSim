@@ -11,15 +11,16 @@ namespace AsmSim
     class Program
     {
 
-        const string asmv = "v0.4";
+        const string asmv = "v0.45";
         const string simv = "v0.45";
+
+        static byte a, b = a = 0;
+        static byte[,] ram = new byte[256, 2];
+        static byte[] flags = new byte[8];
+
 
         static void Main(string[] args)
         {
-            byte a, b = a = 0;
-            byte[,] ram = new byte[256, 2];
-            byte[] flags = new byte[8];
-
             Console.Title = "AsmSim " + simv + "";
 
             while (true)
@@ -39,10 +40,11 @@ namespace AsmSim
                     Console.Clear();
                     bool p = true;
                     int cc = 0;
+                    int cNum = 0;
                     ConsoleKeyInfo key;
                     while (p)
                     {
-                        key = new ConsoleKeyInfo('a',ConsoleKey.A,true,true,true);
+                        key = new ConsoleKeyInfo('a', ConsoleKey.A, true, true, true);
                         if (c < 128 && c >= 0)
                         {
                             Select(true);
@@ -52,28 +54,53 @@ namespace AsmSim
                             Console.Write((str = "    128-addr | 8-bit | RISC JAsm " + asmv + "") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                             Console.SetCursorPosition(0, 0);
                             Console.SetCursorPosition(0, 1);
+                            Select(false);
                             for (int i = 0; i < Console.WindowHeight - 2; i++)
                             {
-                                if (c + i > 127)
+                                //Current address based on scrolling
+                                cNum = ((c > 5) ? c + i - 5 : i);
+                                Select(false);
+                                //Clear line & continue if over 127
+                                if (cNum > 127)
                                 {
                                     Console.Write(string.Concat(Enumerable.Repeat(" ", Console.WindowWidth)));
                                     continue;
                                 }
-                                char[] ch = ToHex(ram[c + i, 0]);
-                                Select(false);
-                                Console.Write("{0}> ", (c + i).ToString("000"));
-                                Select(cc == 0 && i == 0);
+                                //Select first byte of ram address
+                                char[] ch = ToHex(ram[cNum, 0]);
+                                Console.SetCursorPosition(0, 1 + i);                         
+
+                                //Write cNum as a 3-digit string
+                                // Console.Write("{0}> ", Clamp((c>5)?((i>5)?c + i + (i-5):c - (5 - i)):i,0,255).ToString("000"));
+                                Console.Write(cNum.ToString("000") + "> ");
+                                //Check if should be selected & write
+                                Select(cc == 0 && i == ((c<5)?c:5));
                                 Console.Write(ch[0]);
-                                Select(cc == 1 && i == 0);
+                                //Ditto
+                                Select(cc == 1 && i == ((c < 5) ? c : 5));
                                 Console.Write(ch[1]);
-                                ch = ToHex(ram[c + i, 1]);
-                                Select(cc == 2 && i == 0);
+
+                                //Select second byte of ram
+                                ch = ToHex(ram[cNum, 1]);
+
+                                //CHeck if should be selected & write
+                                Select(cc == 2 && i == ((c < 5) ? c : 5));
                                 Console.Write(ch[0]);
-                                Select(cc == 3 && i == 0);
+                                //Ditto
+                                Select(cc == 3 && i == ((c < 5) ? c : 5));
                                 Console.Write(ch[1]);
+                                //Move cursor over to position 13 from left
+                                Console.SetCursorPosition(13, Console.CursorTop);
+                                //Select
+                                Select(true);
+                                //Write command mnemonic and value
+                                Console.Write(ParseCommand(cNum));
+                                //CRNL
                                 Console.SetCursorPosition(0, Console.CursorTop + 1);
                             }
+                            //Set cursor up to keep focus
                             Console.SetCursorPosition(0, 0);
+                            //Check keys
                             if ((key = Console.ReadKey(true)).Key == ConsoleKey.Q && key.Modifiers == ConsoleModifiers.Control)
                             {
                                 break;
@@ -95,18 +122,26 @@ namespace AsmSim
                             {
                                 if (cc > 0) cc--;
                             }
+                            //RAM Write
                             else
                             {
+                                //Get pressed key as byte
                                 byte i = ParseKey(key.Key);
+                                //i is NOT 16
                                 if (i != 16)
                                 {
+                                    //Get both bytes
                                     char[] arr = ToHex(ram[c, cc > 1 ? 1 : 0]);
+                                    //Set current byte to new byte
                                     arr[cc == 0 || cc == 2 ? 0 : 1] = ToHex(i)[1];
+                                    //Save change
                                     ram[c, cc > 1 ? 1 : 0] = ToByte(arr);
+                                    //If current character is not the last character, move forwards
                                     if (cc < 3) cc++;
                                 }
                             }
 
+                            //Loop around if c goes over or under max or min values
                             if (c > 127) c = 0;
                             else if (c < 0) c = 127;
                         }
@@ -250,17 +285,38 @@ namespace AsmSim
                             a = CharNum((byte)Console.Read());
                         }
                         //GET - Get Byte from prompt - 15
-                        else if (com == 20)
+                        else if (com == 21)
                         {
                             char o1 = Console.ReadKey().KeyChar;
                             char o2 = Console.ReadKey().KeyChar;
                             a = ToByte(new char[] { o1, o2 });
                         }
                         //BP - Console beep - 16
-                        else if (com == 21)
+                        else if (com == 22)
                         {
                             int bp = 255 * a;
                             Console.Beep(bp, b * 10);
+                        }
+                        //SCX - Set Cursor X - 17
+                        else if (com == 23)
+                        {
+                            flags[2] = a;
+                        }
+                        //SCY - Set Cursor Y - 18
+                        else if (com == 24)
+                        {
+                            flags[3] = a;
+                        }
+                        //SCP - Set Cursor Pos - 19
+                        else if (com == 25)
+                        {
+                            Console.SetCursorPosition((flags[2] / Console.WindowWidth) * 10, (flags[3] / Console.WindowHeight) * 10);
+                        }
+                        //SSC - Set Screen Color - 1A
+                        else if (com == 26)
+                        {
+                            Console.ForegroundColor = (ConsoleColor)Clamp(a, 0, 14);
+                            Console.BackgroundColor = (ConsoleColor)Clamp(b, 0, 14);
                         }
 
                     }
@@ -460,6 +516,10 @@ namespace AsmSim
                             "  15 - GET - Gets a hexadecimal byte from the prompt and stores it in A",
                             "   Note: GET asks for 2 characters (to complete a byte), but GCH and GNM and for only 1",
                             "  16 - BP  - Beep, causes a console beep. Frequency is controlled by A, with every 1 in A as 255 in BP. Length is controlled by B, and every 1 in B is 10 ms in BP",
+                            "  17 - SCX - Set cursor x for use with the SCP command. Does not immediately set, run SCP to take effect.",
+                            "  18 - SCY - Set cursor y for use with the SCP command. Does not immediately set, run SCP to take effect.",
+                            "  19 - SCP - Set cursor position to a value indicated by commands SCX and SCY",
+                            "  1A - SSC - Set screen color. A is text color, B is background color. A table of usable numbers with their associated colors can be found at MSDN, by searching for \"ConsoleColour\"",
                             };
                             while (true)
                             {
@@ -553,6 +613,44 @@ namespace AsmSim
             }
         }
 
+        private static string ParseCommand(int c)
+        {
+            byte com = ram[c, 0];
+            byte val = ram[c, 1];
+            string ret = "";
+            if (com == 0) ret = "HLT ";
+            else if (com == 1) ret = "STA ";
+            else if (com == 2) ret = "MVB ";
+            else if (com == 3) ret = "MVA ";
+            else if (com == 4) ret = "MVR ";
+            else if (com == 5) ret = "MRA ";
+            else if (com == 6) ret = "SRF ";
+            else if (com == 7) ret = "CMP ";
+            else if (com == 8) ret = "JL  ";
+            else if (com == 9) ret = "JEQ ";
+            else if (com == 10) ret = "JG  ";
+            else if (com == 11) ret = "JMP ";
+            else if (com == 12) ret = "ADD ";
+            else if (com == 13) ret = "SUB ";
+            else if (com == 14) ret = "MUL ";
+            else if (com == 15) ret = "DIV ";
+            else if (com == 16) ret = "OUT ";
+            else if (com == 17) ret = "OUC ";
+            else if (com == 18) ret = "OUB ";
+            else if (com == 19) ret = "GCH ";
+            else if (com == 20) ret = "GNM ";
+            else if (com == 21) ret = "GET ";
+            else if (com == 22) ret = "BP  ";
+            else if (com == 23) ret = "SCX ";
+            else if (com == 24) ret = "SCY ";
+            else if (com == 25) ret = "SCP ";
+            else if (com == 25) ret = "SSC ";
+            else ret = "UDF ";
+
+            return ret + new string(ToHex(val));
+
+        }
+
         //Key parser
         private static byte ParseKey(ConsoleKey key)
         {
@@ -614,6 +712,11 @@ namespace AsmSim
         }
 
         private static void dummy() { }
+
+        public static int Clamp(int value, int min, int max)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
+        }
 
         private static int Menu(string[] v1, string v2, string v3)
         {
