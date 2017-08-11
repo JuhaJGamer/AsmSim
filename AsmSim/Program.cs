@@ -318,6 +318,16 @@ namespace AsmSim
                             Console.ForegroundColor = (ConsoleColor)Clamp(a, 0, 14);
                             Console.BackgroundColor = (ConsoleColor)Clamp(b, 0, 14);
                         }
+                        //MRD - Move RAM Address - 1B
+                        else if(com == 27)
+                        {
+                            ram[b, flags[1]] = a;
+                        }
+                        //MDA - Move Address A - 1C
+                        else if (com == 18)
+                        {
+                            a = ram[b, flags[1]];
+                        }
 
                     }
                 }
@@ -521,7 +531,11 @@ namespace AsmSim
                             "  18 - SCY - Set cursor y for use with the SCP command. Does not immediately set, run SCP to take effect.",
                             "  19 - SCP - Set cursor position to a value indicated by commands SCX and SCY",
                             "  1A - SSC - Set screen color. A is text color, B is background color.",
-                            "   Note: A table of usable numbers with their associated colors can be found at MSDN, by searching for \"ConsoleColour\""
+                            "   Note: A table of usable numbers with their associated colors can be found at MSDN, by searching for \"ConsoleColour\"",
+                            "  1B - MRD - Moves the value of A into the ram address specified by B",
+                            "   Note: Exactly like MVR, but instead of a manually specified address the address is set by B",
+                            "  1C - MDA - Moves a value from a ram address specified by B into a",
+                            "   Note: Exactly like MRA, but isnstead of a manually specified adress it is set by B",
                             };
                             Console.Clear();
                             while (true)
@@ -530,13 +544,13 @@ namespace AsmSim
                                 Console.SetCursorPosition(0, 0);
                                 Console.Write((str = "    JAsm " + asmv + " | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                                 Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                                Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to exit | Up: Scroll up| Down: Scroll down") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to exit | Up: Scroll up | Down: Scroll down") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                                 Console.SetCursorPosition(0, 0);
                                 Console.SetCursorPosition(0, 1);
                                 Select(false);
                                 for (int i = 0; i < Console.WindowHeight - 3; i++)
                                 {
-                                    Console.WriteLine(txt[scrl + i] + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - txt[scrl + i].Length - 1)));
+                                    Console.WriteLine(txt[scrl + i] + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - txt[scrl + i].Length - 2)));
                                 }
                                 ckey = Console.ReadKey();
                                 if (ckey.Key == ConsoleKey.UpArrow)
@@ -580,7 +594,7 @@ namespace AsmSim
                                 Console.SetCursorPosition(0, 0);
                                 Console.Write((str = "    AsmSim " + simv + " | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                                 Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                                Console.Write((str = "    AsmSim " + simv + " | Ctrl+Q to exit " + ((txt.Length > (Console.WindowHeight - 3)) ? "| Up: Scroll up| Down: Scroll down" : "")) + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
+                                Console.Write((str = "    AsmSim " + simv + " | Ctrl+Q to exit " + ((txt.Length > (Console.WindowHeight - 3)) ? "| Up: Scroll up | Down: Scroll down" : "")) + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
                                 Console.SetCursorPosition(0, 0);
                                 Console.SetCursorPosition(0, 1);
                                 Select(false);
@@ -652,7 +666,9 @@ namespace AsmSim
             else if (com == 23) ret = "SCX ";
             else if (com == 24) ret = "SCY ";
             else if (com == 25) ret = "SCP ";
-            else if (com == 25) ret = "SSC ";
+            else if (com == 26) ret = "SSC ";
+            else if (com == 27) ret = "MRD ";
+            else if (com == 28) ret = "MDA ";
             else ret = "UDF ";
 
             return ret + new string(ToHex(val));
@@ -728,7 +744,6 @@ namespace AsmSim
 
         private static int Menu(string[] v1, string v2, string v3)
         {
-            //Might just throw that now because that saves... memory? or maybe cpu? anyways it does less work if you do like this.
             Console.CursorVisible = false;
             MenuItem[] items = new MenuItem[v1.Length];
             int active = 0;
