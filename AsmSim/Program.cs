@@ -515,11 +515,12 @@ namespace AsmSim
                             "  14 - GNM - Getnum, Gets a number from the prompt and stores it in A",
                             "  15 - GET - Gets a hexadecimal byte from the prompt and stores it in A",
                             "   Note: GET asks for 2 characters (to complete a byte), but GCH and GNM and for only 1",
-                            "  16 - BP  - Beep, causes a console beep. Frequency is controlled by A, with every 1 in A as 255 in BP. Length is controlled by B, and every 1 in B is 10 ms in BP",
+                            "  16 - BP  - Beep, causes a console beep. Frequency is controlled by A, with every 1 in A as 255 in BP. \n   Length is controlled by B, and every 1 in B is 10 ms in BP",
                             "  17 - SCX - Set cursor x for use with the SCP command. Does not immediately set, run SCP to take effect.",
                             "  18 - SCY - Set cursor y for use with the SCP command. Does not immediately set, run SCP to take effect.",
                             "  19 - SCP - Set cursor position to a value indicated by commands SCX and SCY",
-                            "  1A - SSC - Set screen color. A is text color, B is background color. A table of usable numbers with their associated colors can be found at MSDN, by searching for \"ConsoleColour\"",
+                            "  1A - SSC - Set screen color. A is text color, B is background color.",
+                            "   Note: A table of usable numbers with their associated colors can be found at MSDN, by searching for \"ConsoleColour\""
                             };
                             while (true)
                             {
