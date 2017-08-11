@@ -569,12 +569,13 @@ namespace AsmSim
                                 "  Update to 0.5,\n  fixed scrolling",
                                 "  Edited changelog to show version numbers",
                                 " 0.45:",
-                                "  Updated client to v0.45,\n  made easily changeable version numbers,\n  Changed program mode into using ctrl + q for exiting.",
+                                "  Updated client to v0.45,\n  made easily changeable version numbers,",
+                                "  Changed program mode into using ctrl + q for exiting.",
                                 "  Updated JAsm to v0.4,\n  added BP command for console beeps.",
                             };
+                            Console.Clear();
                             while (true)
                             {
-                                Console.Clear();
                                 Select(true);
                                 Console.SetCursorPosition(0, 0);
                                 Console.Write((str = "    AsmSim " + simv + " | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
@@ -585,7 +586,7 @@ namespace AsmSim
                                 Select(false);
                                 for (int i = 0; i < ((txt.Length > Console.WindowHeight - 3) ? Console.WindowHeight - 3 : txt.Length); i++)
                                 {
-                                    Console.WriteLine(txt[scrl + i]);
+                                    Console.WriteLine(txt[scrl + i] + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - txt[scrl + i].Length - 1)));
                                 }
                                 ckey = Console.ReadKey();
                                 if (ckey.Key == ConsoleKey.UpArrow)
