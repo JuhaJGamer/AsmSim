@@ -11,7 +11,7 @@ namespace AsmSim
     class Program
     {
 
-        const string asmv = "v0.45";
+        const string asmv = "v0.5";
         const string simv = "v0.45";
 
         static byte a, b = a = 0;
@@ -555,6 +555,7 @@ namespace AsmSim
                         {
                             int scrl = 0;
                             ConsoleKeyInfo ckey;
+                            //Changelog
                             string[] txt = new string[]
                             {
                                 "AsmSim "+simv+" by JuhaJGamer 2017",
@@ -562,8 +563,12 @@ namespace AsmSim
                                 "current JASm version "+asmv+"",
                                 " ",
                                 "Changelog:",
-                                " Updated client to v0.45,\n made easily changeable version numbers,\n Changed program mode into using ctrl + q for exiting.",
-                                " Updated JAsm to v0.4,\n added BP command for console beeps.",
+                                " 0.50",
+                                "  Update to 0.5,\n  fixed scrolling",
+                                "  Edited changelog to show version numbers",
+                                " 0.45:",
+                                "  Updated client to v0.45,\n  made easily changeable version numbers,\n  Changed program mode into using ctrl + q for exiting.",
+                                "  Updated JAsm to v0.4,\n  added BP command for console beeps.",
                             };
                             while (true)
                             {
