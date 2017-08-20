@@ -10,7 +10,7 @@ In AsmSim, the info tab should answer most questions, including the basics of JA
 
 ### Prerequisites
 
-The prequisites for this project are Windows 7 ot above or a level of WINE that can support .NET 4.0,
+The prequisites for this project are Windows 7 or above, or a level of WINE that can support .NET 4.0,
 and .NET 4.0 which, if you don't already have, you can download [here](https://www.microsoft.com/fi-fi/download/details.aspx?id=55167).
 
 ### Installing
