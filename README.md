@@ -22,7 +22,7 @@ After that you should be good to go and program JAsm.
 
 ## Authors
 
-**Juha Kankare** - *Initial work and pretty much everythign so far* - [JuhaJGamer](https://github.com/JuhaJGamer)
+**Juha Kankare** - *Initial work and pretty much everything so far* - [JuhaJGamer](https://github.com/JuhaJGamer)
 
 See also the list of [contributors](https://github.com/JuhaJGamer/AsmSim/contributors) who participated in this project.
 
