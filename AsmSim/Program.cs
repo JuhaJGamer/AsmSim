@@ -12,11 +12,13 @@ namespace AsmSim
     {
 
         const string asmv = "v0.5";
-        const string simv = "v0.45";
+        const string simv = "v0.52";
 
         static byte a, b = a = 0;
         static byte[,] ram = new byte[256, 2];
         static byte[] flags = new byte[8];
+
+        static string[] instructions = new string[] { "HLT", "STA", "MVB", "MVA", "MVR", "MRA", "SRF", "CMP", "JL ", "JEQ", "JG ", "JMP", "ADD", "SUB", "MUL", "DUV", "OUT", "OUC", "OUB", "GCH", "GNM", "GET", "BP ", "SCX", "SCY", "SCP", "SSC", "MRD", "MDA" };
 
 
         static void Main(string[] args)
@@ -68,13 +70,13 @@ namespace AsmSim
                                 }
                                 //Select first byte of ram address
                                 char[] ch = ToHex(ram[cNum, 0]);
-                                Console.SetCursorPosition(0, 1 + i);                         
+                                Console.SetCursorPosition(0, 1 + i);
 
                                 //Write cNum as a 3-digit string
                                 // Console.Write("{0}> ", Clamp((c>5)?((i>5)?c + i + (i-5):c - (5 - i)):i,0,255).ToString("000"));
                                 Console.Write(cNum.ToString("000") + "> ");
                                 //Check if should be selected & write
-                                Select(cc == 0 && i == ((c<5)?c:5));
+                                Select(cc == 0 && i == ((c < 5) ? c : 5));
                                 Console.Write(ch[0]);
                                 //Ditto
                                 Select(cc == 1 && i == ((c < 5) ? c : 5));
@@ -319,7 +321,7 @@ namespace AsmSim
                             Console.BackgroundColor = (ConsoleColor)Clamp(b, 0, 14);
                         }
                         //MRD - Move RAM Address - 1B
-                        else if(com == 27)
+                        else if (com == 27)
                         {
                             ram[b, flags[1]] = a;
                         }
@@ -487,8 +489,6 @@ namespace AsmSim
                         c = Menu(new string[] { "JAsm", "AsmSim", "Back" }, "SELECT ACTION:\n", "AsmSim " + simv + " with JAsm " + asmv + " | Info");
                         if (c == 0)
                         {
-                            int scrl = 0;
-                            ConsoleKeyInfo ckey;
                             string[] txt = new string[]
                             {
                             "JAsm " + asmv + " by JuhaJGamer 2017",
@@ -497,7 +497,9 @@ namespace AsmSim
                             "                       || ||",
                             "         Instruction byte ||",
                             "          Argument(val) byte",
+                            "                            ",
                             " Commands:                  ",
+                            "  XX - ERR - Any invalid command.",
                             "  00 - HLT - Halts the program",
                             "  01 - STA - Stores a value into register A",
                             "  02 - MVB - Moves a value from A to B",
@@ -518,9 +520,9 @@ namespace AsmSim
                             "  0E - MUL - Multiplies A by B and store sthe result in A",
                             "  0F - DIV - Divides A by B and stores the result in A",
                             "   Note: No decimals, truncated answer",
-                            "  10 - OUT - Outputs A as a number (Ie. A = 10, OUT => \"10\")",
-                            "  11 - OUC - Outputs A as a character (Ie. A=6C, OUC => \"l\")",
-                            "  12 - OUB - Outputs A as a hexadecimal byte (Ie. A=1A =>\"1A\")",
+                            "  10 - OUT - Outputs A as a number (e.g. A = 10, OUT => \"10\")",
+                            "  11 - OUC - Outputs A as a character (e.g. A = 6C, OUC => \"l\")",
+                            "  12 - OUB - Outputs A as a hexadecimal byte (e.g. A=1A =>\"1A\")",
                             "  13 - GCH - Getch, Gets a character from the prompt and stores it in A",
                             "  14 - GNM - Getnum, Gets a number from the prompt and stores it in A",
                             "  15 - GET - Gets a hexadecimal byte from the prompt and stores it in A",
@@ -536,42 +538,26 @@ namespace AsmSim
                             "   Note: Exactly like MVR, but instead of a manually specified address the address is set by B",
                             "  1C - MDA - Moves a value from a ram address specified by B into a",
                             "   Note: Exactly like MRA, but isnstead of a manually specified adress it is set by B",
+                            "  ",
+                            "  ",
+                            "Memory structure:",
+                            " Registers:",
+                            "  A - Main register A. Most operations happen/are stored here.",
+                            "  B - Secondary register. Most multi-number operations use this.",
+                            "  F - Flag register, usually just called \"Flag\". ",
+                            "      Contains stuff like which byte of RAM to use (each address stores two bytes).",
+                            "  ",
+                            " RAM and Program memory:",
+                            "  RAM - 256 addresses, 512 bytes. Contains EVERYTHING.",
+                            "        All data accessed by the ram commands is here, and so are your instructions.",
+                            "   Program memory - Addresses 0-127. A special chunk of ram to contain instructions. ",
+                            "                    That is, everything you can access from the \"Program\" screen."
                             };
-                            Console.Clear();
-                            while (true)
-                            {
-                                Select(true);
-                                Console.SetCursorPosition(0, 0);
-                                Console.Write((str = "    JAsm " + asmv + " | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
-                                Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                                Console.Write((str = "    JAsm " + asmv + " | Ctrl+Q to exit | Up: Scroll up | Down: Scroll down") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
-                                Console.SetCursorPosition(0, 0);
-                                Console.SetCursorPosition(0, 1);
-                                Select(false);
-                                for (int i = 0; i < Console.WindowHeight - 3; i++)
-                                {
-                                    Console.WriteLine(txt[scrl + i] + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - txt[scrl + i].Length - 2)));
-                                }
-                                ckey = Console.ReadKey();
-                                if (ckey.Key == ConsoleKey.UpArrow)
-                                {
-                                    if (scrl > 0) scrl--;
-                                }
-                                else if (ckey.Key == ConsoleKey.DownArrow)
-                                {
-                                    if (scrl < txt.Length - (Console.WindowHeight - 3)) scrl++;
-                                }
-                                else if (ckey.Key == ConsoleKey.Q && ckey.Modifiers == ConsoleModifiers.Control)
-                                {
-                                    break;
-                                }
-                            }
+                            InfoScreen("    JAsm " + asmv + " | Info ", "    JAsm " + asmv + " | Q: Exit | Up: Scroll up | Down: Scroll down", txt);
                         }
                         else if (c == 1)
                         {
-                            int scrl = 0;
-                            ConsoleKeyInfo ckey;
-                            //Changelog
+                            //Changelog basically
                             string[] txt = new string[]
                             {
                                 "AsmSim "+simv+" by JuhaJGamer 2017",
@@ -579,43 +565,18 @@ namespace AsmSim
                                 "current JASm version "+asmv+"",
                                 " ",
                                 "Changelog:",
+                                " 0.52",
+                                "  Update sim to 0.52,\n minor info fixes",
+                                "  "
                                 " 0.50",
                                 "  Update to 0.5,\n  fixed scrolling",
                                 "  Edited changelog to show version numbers",
                                 " 0.45:",
-                                "  Updated client to v0.45,\n  made easily changeable version numbers,",
+                                "  Updated sim to v0.45,\n  made easily changeable version numbers,",
                                 "  Changed program mode into using ctrl + q for exiting.",
                                 "  Updated JAsm to v0.4,\n  added BP command for console beeps.",
                             };
-                            Console.Clear();
-                            while (true)
-                            {
-                                Select(true);
-                                Console.SetCursorPosition(0, 0);
-                                Console.Write((str = "    AsmSim " + simv + " | Info ") + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
-                                Console.SetCursorPosition(0, Console.WindowHeight - 1);
-                                Console.Write((str = "    AsmSim " + simv + " | Ctrl+Q to exit " + ((txt.Length > (Console.WindowHeight - 3)) ? "| Up: Scroll up | Down: Scroll down" : "")) + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - str.Length)));
-                                Console.SetCursorPosition(0, 0);
-                                Console.SetCursorPosition(0, 1);
-                                Select(false);
-                                for (int i = 0; i < ((txt.Length > Console.WindowHeight - 3) ? Console.WindowHeight - 3 : txt.Length); i++)
-                                {
-                                    Console.WriteLine(txt[scrl + i] + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - txt[scrl + i].Length - 1)));
-                                }
-                                ckey = Console.ReadKey();
-                                if (ckey.Key == ConsoleKey.UpArrow)
-                                {
-                                    if (scrl > 0) scrl--;
-                                }
-                                else if (ckey.Key == ConsoleKey.DownArrow)
-                                {
-                                    if (scrl < txt.Length - (Console.WindowHeight - 3)) scrl++;
-                                }
-                                else if (ckey.Key == ConsoleKey.Q && ckey.Modifiers == ConsoleModifiers.Control)
-                                {
-                                    break;
-                                }
-                            }
+                            InfoScreen("    AsmSim " + simv + " | Info ","    AsmSim " + simv + " | Q: Exit " + ((txt.Length > (Console.WindowHeight - 3)) ? "| Up: Scroll up | Down: Scroll down" : ""),txt);                           
                         }
                         else if (c == 2)
                         {
@@ -635,44 +596,50 @@ namespace AsmSim
             }
         }
 
+        private static void InfoScreen(string infoBar, string statusBar, string[] txt)
+        {
+            Console.Clear();
+            int scrl = 0;
+            ConsoleKeyInfo ckey;
+            Select(true);
+            Console.SetCursorPosition(0, 0);
+            Console.Write((infoBar + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - infoBar.Length))));
+            Console.SetCursorPosition(0, Console.WindowHeight - 1);
+            Console.Write((statusBar + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - statusBar.Length))));
+            Console.SetCursorPosition(0, 0);
+            Select(false);
+            while (true)
+            {
+                Console.SetCursorPosition(0, 1);
+                for (int i = 0; i < Math.Min(Console.WindowHeight - 3,txt.Length); i++)
+                {
+                    Console.WriteLine(txt[scrl + i] + string.Concat(Enumerable.Repeat(" ", Console.WindowWidth - txt[scrl + i].Length - 2)));
+                }
+                ckey = Console.ReadKey();
+                if (ckey.Key == ConsoleKey.UpArrow)
+                {
+                    if (scrl > 0) scrl--;
+                }
+                else if (ckey.Key == ConsoleKey.DownArrow)
+                {
+                    if (scrl < txt.Length - (Console.WindowHeight - 3)) scrl++;
+                }
+                else if (ckey.Key == ConsoleKey.Q)
+                {
+                    return;
+                }
+            }
+        }
+
         private static string ParseCommand(int c)
         {
             byte com = ram[c, 0];
             byte val = ram[c, 1];
-            string ret = "";
-            if (com == 0) ret = "HLT ";
-            else if (com == 1) ret = "STA ";
-            else if (com == 2) ret = "MVB ";
-            else if (com == 3) ret = "MVA ";
-            else if (com == 4) ret = "MVR ";
-            else if (com == 5) ret = "MRA ";
-            else if (com == 6) ret = "SRF ";
-            else if (com == 7) ret = "CMP ";
-            else if (com == 8) ret = "JL  ";
-            else if (com == 9) ret = "JEQ ";
-            else if (com == 10) ret = "JG  ";
-            else if (com == 11) ret = "JMP ";
-            else if (com == 12) ret = "ADD ";
-            else if (com == 13) ret = "SUB ";
-            else if (com == 14) ret = "MUL ";
-            else if (com == 15) ret = "DIV ";
-            else if (com == 16) ret = "OUT ";
-            else if (com == 17) ret = "OUC ";
-            else if (com == 18) ret = "OUB ";
-            else if (com == 19) ret = "GCH ";
-            else if (com == 20) ret = "GNM ";
-            else if (com == 21) ret = "GET ";
-            else if (com == 22) ret = "BP  ";
-            else if (com == 23) ret = "SCX ";
-            else if (com == 24) ret = "SCY ";
-            else if (com == 25) ret = "SCP ";
-            else if (com == 26) ret = "SSC ";
-            else if (com == 27) ret = "MRD ";
-            else if (com == 28) ret = "MDA ";
-            else ret = "UDF ";
-
-            return ret + new string(ToHex(val));
-
+            if (com < instructions.Length)
+            {
+                return instructions[com] + " " + new string(ToHex(val));
+            }
+            return "ERR" + " " + new string(ToHex(val)); ;
         }
 
         //Key parser
